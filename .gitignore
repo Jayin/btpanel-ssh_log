@@ -1,0 +1,16 @@
+# 运行时缓存与临时数据
+ip_cache.json
+*.log
+
+# Python 缓存文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 编辑器与操作系统缓存
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~

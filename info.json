@@ -1,0 +1,11 @@
+{
+    "title": "SSH登录日志",
+    "name": "ssh_log",
+    "ps": "SSH安全审计与登录日志查看器，支持登录成功/失败状态实时监控、爆破攻击统计、在线终端会话管理与一键IP封锁",
+    "versions": "1.0.0",
+    "checks": "/www/server/panel/plugin/ssh_log",
+    "author": "Rover",
+    "home": "https://www.bt.cn",
+    "beta": false,
+    "force_message": ""
+}

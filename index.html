@@ -1,0 +1,868 @@
+<!-- AUTO DARK THEME --->
+<style>
+    /* SSH登录日志插件样式 */
+    .ssh-log-container {
+        padding: 14px 18px;
+        color: #333;
+        font-size: 13px;
+        box-sizing: border-box;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 顶部数据看板 */
+    .ssh-stat-cards {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 12px;
+        flex-shrink: 0;
+    }
+    .ssh-stat-card {
+        flex: 1;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        padding: 10px 16px;
+        border-left: 3px solid #cbd5e1;
+        transition: all 0.2s ease;
+    }
+    .ssh-stat-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .ssh-stat-card.card-success { border-left-color: #20a53a; }
+    .ssh-stat-card.card-danger { border-left-color: #ef4444; }
+    .ssh-stat-card.card-warning { border-left-color: #f59e0b; }
+    .ssh-stat-card.card-info { border-left-color: #0284c7; }
+
+    .ssh-stat-title {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 2px;
+    }
+    .ssh-stat-val {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e293b;
+        line-height: 1.2;
+    }
+    .ssh-stat-val.text-success { color: #20a53a; }
+    .ssh-stat-val.text-danger { color: #ef4444; }
+    .ssh-stat-val.text-warning { color: #f59e0b; }
+    .ssh-stat-val.text-info { color: #0284c7; }
+
+    /* 顶部选项卡 */
+    .ssh-tab-nav {
+        display: flex;
+        border-bottom: 2px solid #e2e8f0;
+        margin-bottom: 12px;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+    .ssh-tab-item {
+        padding: 8px 18px;
+        cursor: pointer;
+        font-weight: 500;
+        color: #64748b;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -2px;
+        transition: all 0.2s;
+    }
+    .ssh-tab-item:hover {
+        color: #20a53a;
+    }
+    .ssh-tab-item.active {
+        color: #20a53a;
+        border-bottom-color: #20a53a;
+        font-weight: 600;
+    }
+
+    /* Tab 内容区 */
+    .ssh-tab-pane {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    /* 工具栏筛选器 */
+    .ssh-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+    .ssh-filters {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    /* 下拉框统一样式：优化向右箭头的内边距与图标间距 */
+    .ssh-select {
+        height: 32px;
+        line-height: 32px;
+        padding: 0 28px 0 10px !important;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        font-size: 12px;
+        outline: none;
+        color: #334155;
+        background-color: #fff;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%2364748b' d='M0 0l5 5 5-5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 8px 5px;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        cursor: pointer;
+        box-sizing: border-box;
+    }
+    .ssh-select:focus {
+        border-color: #20a53a;
+        box-shadow: 0 0 0 2px rgba(32, 165, 58, 0.1);
+    }
+    .ssh-select:hover {
+        border-color: #94a3b8;
+    }
+
+    .ssh-filters input {
+        height: 32px;
+        line-height: 32px;
+        padding: 0 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        font-size: 12px;
+        outline: none;
+        box-sizing: border-box;
+    }
+    .ssh-filters input:focus {
+        border-color: #20a53a;
+        box-shadow: 0 0 0 2px rgba(32, 165, 58, 0.1);
+    }
+
+    /* 徽章样式 */
+    .ssh-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .ssh-badge-success { background: #dcfce7; color: #15803d; }
+    .ssh-badge-danger { background: #fee2e2; color: #b91c1c; }
+    .ssh-badge-warning { background: #fef3c7; color: #b45309; }
+    .ssh-badge-blocked { background: #e2e8f0; color: #475569; }
+
+    /* 表格区域自适应 */
+    .ssh-table-box {
+        flex: 1;
+        min-height: 260px;
+        overflow-y: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        background: #fff;
+    }
+    .ssh-table {
+        width: 100%;
+        margin-bottom: 0;
+    }
+    .ssh-table th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: #475569;
+        font-size: 12px;
+        border-bottom: 1px solid #e2e8f0;
+        white-space: nowrap;
+        padding: 8px 12px;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+    .ssh-table td {
+        padding: 8px 12px;
+        vertical-align: middle;
+        font-size: 12px;
+        border-top: 1px solid #f1f5f9;
+    }
+    .ssh-table tr:hover td {
+        background: #f8fafc;
+    }
+
+    /* 分页条 */
+    .ssh-page-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 10px;
+        font-size: 12px;
+        color: #64748b;
+        flex-shrink: 0;
+    }
+    .ssh-page-btns {
+        display: flex;
+        gap: 4px;
+    }
+    .ssh-page-btns button {
+        padding: 3px 12px;
+        font-size: 12px;
+    }
+
+    /* 设置面板网格 */
+    .ssh-settings-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 6px;
+    }
+    .ssh-setting-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 16px;
+    }
+    .ssh-setting-card h4 {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .ssh-setting-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px dashed #e2e8f0;
+        font-size: 13px;
+    }
+    .ssh-setting-item:last-child {
+        border-bottom: none;
+    }
+</style>
+
+<div class="ssh-log-container">
+    <!-- 顶部数据看板 -->
+    <div class="ssh-stat-cards">
+        <div class="ssh-stat-card card-success">
+            <div class="ssh-stat-title">今日成功登录</div>
+            <div class="ssh-stat-val text-success" id="stat_today_success">-</div>
+        </div>
+        <div class="ssh-stat-card card-danger">
+            <div class="ssh-stat-title">今日爆破/失败</div>
+            <div class="ssh-stat-val text-danger" id="stat_today_failed">-</div>
+        </div>
+        <div class="ssh-stat-card card-warning">
+            <div class="ssh-stat-title">今日攻击源 IP</div>
+            <div class="ssh-stat-val text-warning" id="stat_today_attackers">-</div>
+        </div>
+        <div class="ssh-stat-card card-info">
+            <div class="ssh-stat-title">当前在线会话</div>
+            <div class="ssh-stat-val text-info" id="stat_active_sessions">-</div>
+        </div>
+    </div>
+
+    <!-- 顶部选项卡 -->
+    <div class="ssh-tab-nav">
+        <div class="ssh-tab-item active" data-tab="logs">登录日志明细</div>
+        <div class="ssh-tab-item" data-tab="attackers">爆破拦截 TOP 榜</div>
+        <div class="ssh-tab-item" data-tab="sessions">当前在线会话</div>
+        <div class="ssh-tab-item" data-tab="settings">安全配置与维护</div>
+    </div>
+
+    <!-- Tab 1: 登录日志 -->
+    <div id="tab_pane_logs" class="ssh-tab-pane">
+        <div class="ssh-toolbar">
+            <div class="ssh-filters">
+                <select id="sel_status" class="ssh-select" onchange="SSHLog.loadLogs(1)">
+                    <option value="all">全部状态</option>
+                    <option value="success">仅成功登录</option>
+                    <option value="all_failed">全部失败/探测</option>
+                    <option value="failed">仅密码错误</option>
+                    <option value="invalid">仅未知非法用户</option>
+                </select>
+
+                <select id="sel_date" class="ssh-select" onchange="SSHLog.loadLogs(1)">
+                    <option value="all">全部时间</option>
+                    <option value="today">仅今天</option>
+                    <option value="yesterday">仅昨天</option>
+                </select>
+
+                <input type="text" id="ipt_search" placeholder="搜索 IP 或 用户名..." style="width: 170px;" onkeyup="if(event.keyCode==13) SSHLog.loadLogs(1)">
+                <button class="btn btn-default btn-sm" onclick="SSHLog.loadLogs(1)">搜索</button>
+                <button class="btn btn-default btn-sm" onclick="$('#ipt_search').val(''); SSHLog.loadLogs(1)">重置</button>
+            </div>
+
+            <div style="display:flex; gap: 8px; align-items:center;">
+                <span style="font-size:12px; color:#64748b;">自动刷新:</span>
+                <select id="sel_auto_refresh" class="ssh-select" onchange="SSHLog.changeAutoRefresh(this.value)" style="width: 85px;">
+                    <option value="0">关闭</option>
+                    <option value="10">10 秒</option>
+                    <option value="30">30 秒</option>
+                    <option value="60">60 秒</option>
+                </select>
+                <button class="btn btn-default btn-sm" onclick="SSHLog.refreshAll()">刷新</button>
+                <button class="btn btn-default btn-sm" onclick="SSHLog.exportCsv()">导出 CSV</button>
+            </div>
+        </div>
+
+        <div class="ssh-table-box">
+            <table class="table table-hover ssh-table">
+                <thead>
+                    <tr>
+                        <th width="110">状态</th>
+                        <th width="160">登录时间</th>
+                        <th width="110">登录用户</th>
+                        <th width="90">认证方式</th>
+                        <th width="140">来源 IP</th>
+                        <th>归属地</th>
+                        <th width="80">端口</th>
+                        <th width="120" style="text-align:center;">安全操作</th>
+                    </tr>
+                </thead>
+                <tbody id="logs_table_body">
+                    <tr><td colspan="8" style="text-align:center; padding:30px; color:#94a3b8;">正在加载日志数据...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="ssh-page-bar">
+            <div>共 <b id="page_total_count">0</b> 条记录，第 <span id="page_curr">1</span> / <span id="page_total">1</span> 页</div>
+            <div class="ssh-page-btns">
+                <button class="btn btn-default btn-xs" onclick="SSHLog.prevPage()">上一页</button>
+                <button class="btn btn-default btn-xs" onclick="SSHLog.nextPage()">下一页</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 2: 爆破拦截 TOP 榜 -->
+    <div id="tab_pane_attackers" class="ssh-tab-pane" style="display:none;">
+        <div class="ssh-toolbar">
+            <span style="color:#64748b; font-size:12px;">统计近期探测非法用户与密码错误频率最高的恶意 IP，可一键批量拦截：</span>
+            <div>
+                <button class="btn btn-danger btn-sm" onclick="SSHLog.batchBlockTop()">批量封锁高危 IP (>=10次)</button>
+                <button class="btn btn-default btn-sm" onclick="SSHLog.loadTopAttackers()">刷新榜单</button>
+            </div>
+        </div>
+
+        <div class="ssh-table-box">
+            <table class="table table-hover ssh-table">
+                <thead>
+                    <tr>
+                        <th width="70">排名</th>
+                        <th width="150">恶意 IP 地址</th>
+                        <th width="200">IP 归属地</th>
+                        <th width="120">攻击尝试次数</th>
+                        <th>常用探测用户名</th>
+                        <th width="160">最近尝试时间</th>
+                        <th width="100">封锁状态</th>
+                        <th width="100" style="text-align:center;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="attackers_table_body">
+                    <tr><td colspan="8" style="text-align:center; padding:30px; color:#94a3b8;">正在加载恶意 IP 数据...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tab 3: 当前在线会话 -->
+    <div id="tab_pane_sessions" class="ssh-tab-pane" style="display:none;">
+        <div class="ssh-toolbar">
+            <span style="color:#64748b; font-size:12px;">实时监控当前连接到本机的 SSH / 控制台会话终端：</span>
+            <button class="btn btn-default btn-sm" onclick="SSHLog.loadSessions()">刷新会话</button>
+        </div>
+
+        <div class="ssh-table-box">
+            <table class="table table-hover ssh-table">
+                <thead>
+                    <tr>
+                        <th width="110">登录用户</th>
+                        <th width="100">终端号</th>
+                        <th width="150">登录来源 IP</th>
+                        <th width="200">来源归属地</th>
+                        <th width="100">登录时间</th>
+                        <th width="100">空闲时间</th>
+                        <th>当前运行进程/命令</th>
+                        <th width="100" style="text-align:center;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="sessions_table_body">
+                    <tr><td colspan="8" style="text-align:center; padding:30px; color:#94a3b8;">正在加载会话数据...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tab 4: 安全配置与维护 -->
+    <div id="tab_pane_settings" class="ssh-tab-pane" style="display:none;">
+        <div class="ssh-settings-grid">
+            <div class="ssh-setting-card">
+                <h4>SSH 服务状态与基线</h4>
+                <div class="ssh-setting-item">
+                    <span>SSH 运行状态:</span>
+                    <span id="cfg_status" style="font-weight:600; color:#20a53a;">检测中...</span>
+                </div>
+                <div class="ssh-setting-item">
+                    <span>SSH 监听端口:</span>
+                    <span id="cfg_port" style="font-weight:600;">22</span>
+                </div>
+                <div class="ssh-setting-item">
+                    <span>允许 Root 登录 (PermitRootLogin):</span>
+                    <span id="cfg_root" style="font-weight:600;">-</span>
+                </div>
+                <div class="ssh-setting-item">
+                    <span>允许密码认证 (PasswordAuthentication):</span>
+                    <span id="cfg_pwd" style="font-weight:600;">-</span>
+                </div>
+            </div>
+
+            <div class="ssh-setting-card">
+                <h4>日志维护与操作</h4>
+                <p style="color:#64748b; font-size:12px; margin-bottom: 12px;">
+                    当认证日志过大或需要清理历史爆破记录时，可安全重置日志文件。
+                </p>
+                <div style="display:flex; gap:10px; flex-direction:column;">
+                    <button class="btn btn-warning btn-sm" onclick="SSHLog.clearLogs()">清空当前 SSH 认证日志</button>
+                    <button class="btn btn-default btn-sm" onclick="SSHLog.exportCsv()">导出全部日志为 CSV</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 16px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:12px 16px; font-size:12px; color:#166534;">
+            <b>SSH 安全加固建议：</b>
+            <ul style="margin: 6px 0 0 16px; line-height: 1.8;">
+                <li>建议修改默认的 22 端口为高位随机端口（例如 20000~65000 之间），可抵御 90% 以上的无脑扫描脚本。</li>
+                <li>强烈建议禁用密码登录，全面采用更安全的 <b>SSH 密钥 (ED25519 或 RSA 4096)</b> 认证。</li>
+                <li>发现频繁攻击的恶意 IP 时，可点击「加入黑名单」直接联动宝塔防火墙进行阻断。</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+var SSHLog = {
+    currPage: 1,
+    totalPage: 1,
+    pageSize: 15,
+    autoTimer: null,
+    topAttackersData: [],
+
+    init: function() {
+        var self = this;
+
+        // 自适应 16:9 弹窗宽高设置
+        self.resizeModal();
+        setTimeout(function() { self.resizeModal(); }, 60);
+
+        // 监听浏览器窗口大小变动
+        $(window).off('resize.sshlog').on('resize.sshlog', function() {
+            self.resizeModal();
+        });
+
+        // 绑定选项卡切换
+        $('.ssh-tab-item').click(function() {
+            var tab = $(this).data('tab');
+            $('.ssh-tab-item').removeClass('active');
+            $(this).addClass('active');
+            $('.ssh-tab-pane').hide();
+            $('#tab_pane_' + tab).show();
+
+            if (tab === 'logs') {
+                self.loadLogs(self.currPage);
+            } else if (tab === 'attackers') {
+                self.loadTopAttackers();
+            } else if (tab === 'sessions') {
+                self.loadSessions();
+            } else if (tab === 'settings') {
+                self.loadSettings();
+            }
+        });
+
+        // 首次加载
+        this.loadOverview();
+        this.loadLogs(1);
+    },
+
+    // 动态调整弹窗为 16:9 黄金比例并居中
+    resizeModal: function() {
+        var $layer = $('.ssh-log-container').closest('.layui-layer');
+        if (!$layer.length) $layer = $('.layui-layer-page');
+        if (!$layer.length) return;
+
+        var winW = $(window).width() || window.innerWidth || 1200;
+        var winH = $(window).height() || window.innerHeight || 800;
+
+        // 16:9 宽屏比例设计：基准 1040 x 585
+        var targetW = Math.min(1040, Math.floor(winW * 0.94));
+        var targetH = Math.round(targetW * 9 / 16);
+
+        // 如果屏幕高度较小，按屏幕高度反推 16:9，防止超出视口
+        if (targetH > winH * 0.88) {
+            targetH = Math.floor(winH * 0.88);
+            targetW = Math.round(targetH * 16 / 9);
+        }
+
+        var top = Math.max(10, Math.floor((winH - targetH) / 2));
+        var left = Math.max(10, Math.floor((winW - targetW) / 2));
+
+        $layer.css({
+            'width': targetW + 'px',
+            'height': targetH + 'px',
+            'top': top + 'px',
+            'left': left + 'px'
+        });
+
+        var titleH = $layer.find('.layui-layer-title').outerHeight() || 42;
+        var contentH = targetH - titleH;
+
+        $layer.find('.layui-layer-content').css({
+            'height': contentH + 'px',
+            'max-height': contentH + 'px',
+            'overflow': 'hidden',
+            'padding': '0'
+        });
+    },
+
+    // 核心 AJAX 请求封装
+    _api: function(func, params, callback) {
+        params = params || {};
+        var url = '/plugin?action=a&name=ssh_log&s=' + func;
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: params,
+            dataType: 'json',
+            success: function(res) {
+                if (callback) callback(res);
+            },
+            error: function(err) {
+                layer.msg('请求失败，请检查网络或面板状态');
+            }
+        });
+    },
+
+    // 刷新全部概览与当前激活 Tab
+    refreshAll: function() {
+        this.loadOverview();
+        var activeTab = $('.ssh-tab-item.active').data('tab');
+        if (activeTab === 'logs') this.loadLogs(this.currPage);
+        else if (activeTab === 'attackers') this.loadTopAttackers();
+        else if (activeTab === 'sessions') this.loadSessions();
+        else if (activeTab === 'settings') this.loadSettings();
+    },
+
+    // 加载顶部看板概览
+    loadOverview: function() {
+        this._api('get_overview', {}, function(res) {
+            if (res.status && res.msg) {
+                var d = res.msg;
+                $('#stat_today_success').text(d.today_success);
+                $('#stat_today_failed').text(d.today_failed);
+                $('#stat_today_attackers').text(d.today_attackers);
+                $('#stat_active_sessions').text(d.active_sessions_count);
+            }
+        });
+    },
+
+    // 加载日志列表
+    loadLogs: function(p) {
+        var self = this;
+        p = p || 1;
+        self.currPage = p;
+        var status = $('#sel_status').val();
+        var date = $('#sel_date').val();
+        var search = $('#ipt_search').val();
+
+        $('#logs_table_body').html('<tr><td colspan="8" style="text-align:center; padding:25px; color:#94a3b8;">正在加载日志数据...</td></tr>');
+
+        this._api('get_logs', { p: p, row: self.pageSize, status: status, date: date, search: search }, function(res) {
+            if (!res.status) {
+                layer.msg(res.msg);
+                return;
+            }
+            var page = res.msg.page;
+            var list = res.msg.data || [];
+            self.totalPage = page.total_page;
+            $('#page_total_count').text(page.count);
+            $('#page_curr').text(page.p);
+            $('#page_total').text(page.total_page);
+
+            if (list.length === 0) {
+                $('#logs_table_body').html('<tr><td colspan="8" style="text-align:center; padding:30px; color:#94a3b8;">暂无符合条件的日志记录</td></tr>');
+                return;
+            }
+
+            var html = '';
+            for (var i = 0; i < list.length; i++) {
+                var item = list[i];
+                var badgeClass = 'ssh-badge-success';
+                var statusText = '登录成功';
+
+                if (item.status === 'failed') {
+                    badgeClass = 'ssh-badge-danger';
+                    statusText = item.desc || '密码错误';
+                } else if (item.status === 'invalid') {
+                    badgeClass = 'ssh-badge-warning';
+                    statusText = item.desc || '非法用户';
+                }
+
+                var blockBtn = '';
+                if (item.blocked) {
+                    blockBtn = '<span class="ssh-badge ssh-badge-blocked">已封锁</span> <a href="javascript:;" onclick="SSHLog.unblockIp(\'' + item.ip + '\')" style="color:#20a53a; font-size:11px; margin-left:4px;">解封</a>';
+                } else {
+                    if (item.can_block) {
+                        blockBtn = '<button class="btn btn-default btn-xs" style="color:#ef4444; border-color:#fee2e2;" onclick="SSHLog.blockIp(\'' + item.ip + '\')">封锁 IP</button>';
+                    } else {
+                        blockBtn = '<span style="color:#94a3b8; font-size:11px;">受保护IP</span>';
+                    }
+                }
+
+                html += '<tr>' +
+                    '<td><span class="ssh-badge ' + badgeClass + '">' + statusText + '</span></td>' +
+                    '<td>' + (item.time || '-') + '</td>' +
+                    '<td><b>' + (item.user || '-') + '</b></td>' +
+                    '<td>' + (item.method || '-') + '</td>' +
+                    '<td><span style="font-family:monospace;">' + item.ip + '</span></td>' +
+                    '<td>' + (item.area || '-') + '</td>' +
+                    '<td>' + (item.port || '-') + '</td>' +
+                    '<td style="text-align:center;">' + blockBtn + '</td>' +
+                '</tr>';
+            }
+            $('#logs_table_body').html(html);
+        });
+    },
+
+    // 上一页 / 下一页
+    prevPage: function() {
+        if (this.currPage > 1) {
+            this.loadLogs(this.currPage - 1);
+        } else {
+            layer.msg('已是第一页');
+        }
+    },
+    nextPage: function() {
+        if (this.currPage < this.totalPage) {
+            this.loadLogs(this.currPage + 1);
+        } else {
+            layer.msg('已是最后一页');
+        }
+    },
+
+    // 加载爆破拦截 TOP 榜
+    loadTopAttackers: function() {
+        var self = this;
+        $('#attackers_table_body').html('<tr><td colspan="8" style="text-align:center; padding:25px; color:#94a3b8;">正在加载恶意 IP 数据...</td></tr>');
+        this._api('get_top_attackers', {}, function(res) {
+            if (!res.status) {
+                layer.msg(res.msg);
+                return;
+            }
+            var list = res.msg || [];
+            self.topAttackersData = list;
+            if (list.length === 0) {
+                $('#attackers_table_body').html('<tr><td colspan="8" style="text-align:center; padding:30px; color:#94a3b8;">暂无恶意攻击记录，服务器很安全！</td></tr>');
+                return;
+            }
+
+            var html = '';
+            for (var i = 0; i < list.length; i++) {
+                var it = list[i];
+                var rankBadge = (i === 0) ? '<span style="color:#ef4444; font-weight:700;">1</span>' :
+                                (i === 1) ? '<span style="color:#f59e0b; font-weight:700;">2</span>' :
+                                (i === 2) ? '<span style="color:#0284c7; font-weight:700;">3</span>' : (i + 1);
+
+                var usersText = (it.users && it.users.length > 0) ? it.users.join(', ') : '-';
+                var optBtn = '';
+                if (it.blocked) {
+                    optBtn = '<button class="btn btn-default btn-xs" onclick="SSHLog.unblockIp(\'' + it.ip + '\')">解封</button>';
+                } else {
+                    optBtn = '<button class="btn btn-danger btn-xs" onclick="SSHLog.blockIp(\'' + it.ip + '\')">封锁</button>';
+                }
+
+                html += '<tr>' +
+                    '<td>' + rankBadge + '</td>' +
+                    '<td><b style="font-family:monospace;">' + it.ip + '</b></td>' +
+                    '<td>' + (it.area || '-') + '</td>' +
+                    '<td><span style="color:#ef4444; font-weight:700; font-size:14px;">' + it.count + '</span> 次</td>' +
+                    '<td style="color:#64748b;">' + usersText + '</td>' +
+                    '<td>' + (it.last_time || '-') + '</td>' +
+                    '<td>' + (it.blocked ? '<span class="ssh-badge ssh-badge-blocked">已封锁</span>' : '<span class="ssh-badge ssh-badge-danger">未拦截</span>') + '</td>' +
+                    '<td style="text-align:center;">' + optBtn + '</td>' +
+                '</tr>';
+            }
+            $('#attackers_table_body').html(html);
+        });
+    },
+
+    // 批量封锁高危 IP (>=10次)
+    batchBlockTop: function() {
+        var self = this;
+        var toBlock = [];
+        for (var i = 0; i < self.topAttackersData.length; i++) {
+            var item = self.topAttackersData[i];
+            if (item.count >= 10 && !item.blocked && item.can_block) {
+                toBlock.push(item.ip);
+            }
+        }
+
+        if (toBlock.length === 0) {
+            layer.msg('未发现攻击次数 >= 10 且尚未封锁的 IP');
+            return;
+        }
+
+        layer.confirm('确定要将以下 <b>' + toBlock.length + '</b> 个高频攻击 IP 批量加入防火墙黑名单？<br><br><div style="max-height:100px; overflow:auto; background:#f8fafc; padding:8px; font-family:monospace;">' + toBlock.join(', ') + '</div>', {
+            title: '批量封锁确认',
+            icon: 3
+        }, function(idx) {
+            layer.close(idx);
+            var loadIdx = layer.load(1);
+            self._api('batch_block', { ips: toBlock.join(',') }, function(res) {
+                layer.close(loadIdx);
+                layer.msg(res.msg);
+                self.loadTopAttackers();
+            });
+        });
+    },
+
+    // 加载在线终端会话
+    loadSessions: function() {
+        var self = this;
+        $('#sessions_table_body').html('<tr><td colspan="8" style="text-align:center; padding:25px; color:#94a3b8;">正在检测在线会话...</td></tr>');
+        this._api('get_active_sessions_api', {}, function(res) {
+            if (!res.status) {
+                layer.msg(res.msg);
+                return;
+            }
+            var list = res.msg || [];
+            if (list.length === 0) {
+                $('#sessions_table_body').html('<tr><td colspan="8" style="text-align:center; padding:30px; color:#94a3b8;">当前无活动的 SSH 终端会话</td></tr>');
+                return;
+            }
+
+            var html = '';
+            for (var i = 0; i < list.length; i++) {
+                var s = list[i];
+                html += '<tr>' +
+                    '<td><b>' + s.user + '</b></td>' +
+                    '<td><span class="ssh-badge ssh-badge-success">' + s.tty + '</span></td>' +
+                    '<td><span style="font-family:monospace;">' + s.from + '</span></td>' +
+                    '<td>' + s.area + '</td>' +
+                    '<td>' + s.login + '</td>' +
+                    '<td>' + s.idle + '</td>' +
+                    '<td><span style="color:#64748b; font-family:monospace; font-size:11px;">' + (s.what || '-') + '</span></td>' +
+                    '<td style="text-align:center;"><button class="btn btn-default btn-xs" style="color:#ef4444;" onclick="SSHLog.killSession(\'' + s.tty + '\')">强制断开</button></td>' +
+                '</tr>';
+            }
+            $('#sessions_table_body').html(html);
+        });
+    },
+
+    // 终止终端会话
+    killSession: function(tty) {
+        var self = this;
+        layer.confirm('确定要强制断开并踢出终端 <b>[' + tty + ']</b> 吗？', { title: '断开终端提示', icon: 3 }, function(idx) {
+            layer.close(idx);
+            self._api('kill_session', { tty: tty }, function(res) {
+                layer.msg(res.msg);
+                self.loadSessions();
+                self.loadOverview();
+            });
+        });
+    },
+
+    // 加载安全配置
+    loadSettings: function() {
+        this._api('get_ssh_info_api', {}, function(res) {
+            if (res.status && res.msg) {
+                var d = res.msg;
+                $('#cfg_status').text(d.status === 'running' ? '运行中 (Active)' : '已停止 (Stopped)');
+                $('#cfg_status').css('color', d.status === 'running' ? '#20a53a' : '#ef4444');
+                $('#cfg_port').text(d.port);
+                $('#cfg_root').text(d.permit_root);
+                $('#cfg_pwd').text(d.password_auth);
+            }
+        });
+    },
+
+    // 封锁单个 IP
+    blockIp: function(ip) {
+        var self = this;
+        layer.confirm('确定要封锁 IP <b>' + ip + '</b> 吗？将加入系统防火墙黑名单阻止其连接所有端口。', { title: '封锁 IP 提示', icon: 3 }, function(idx) {
+            layer.close(idx);
+            var loadIdx = layer.load(1);
+            self._api('block_ip', { ip: ip }, function(res) {
+                layer.close(loadIdx);
+                layer.msg(res.msg);
+                self.refreshAll();
+            });
+        });
+    },
+
+    // 解封单个 IP
+    unblockIp: function(ip) {
+        var self = this;
+        layer.confirm('确定要从防火墙中解封 IP <b>' + ip + '</b> 吗？', { title: '解封 IP 提示', icon: 3 }, function(idx) {
+            layer.close(idx);
+            var loadIdx = layer.load(1);
+            self._api('unblock_ip', { ip: ip }, function(res) {
+                layer.close(loadIdx);
+                layer.msg(res.msg);
+                self.refreshAll();
+            });
+        });
+    },
+
+    // 清理日志
+    clearLogs: function() {
+        var self = this;
+        layer.confirm('确定要清空当前的 SSH 认证日志吗？历史记录将被清空，请谨慎操作。', { title: '清空日志警告', icon: 2 }, function(idx) {
+            layer.close(idx);
+            var loadIdx = layer.load(1);
+            self._api('clear_logs', {}, function(res) {
+                layer.close(loadIdx);
+                layer.msg(res.msg);
+                self.refreshAll();
+            });
+        });
+    },
+
+    // 导出 CSV
+    exportCsv: function() {
+        var loadIdx = layer.load(1);
+        this._api('export_logs', {}, function(res) {
+            layer.close(loadIdx);
+            if (res.status && res.msg) {
+                layer.alert('CSV 日志文件已生成在服务器：<br><br><code>' + res.msg.path + '</code><br><br>您可通过宝塔「文件」管理器下载该文件。', { title: '导出成功', icon: 1 });
+            } else {
+                layer.msg(res.msg || '导出失败');
+            }
+        });
+    },
+
+    // 自动刷新
+    changeAutoRefresh: function(seconds) {
+        var self = this;
+        if (self.autoTimer) {
+            clearInterval(self.autoTimer);
+            self.autoTimer = null;
+        }
+        seconds = parseInt(seconds);
+        if (seconds > 0) {
+            self.autoTimer = setInterval(function() {
+                self.refreshAll();
+            }, seconds * 1000);
+            layer.msg('已开启 ' + seconds + ' 秒自动刷新', { icon: 1, time: 1500 });
+        } else {
+            layer.msg('已关闭自动刷新', { icon: 0, time: 1500 });
+        }
+    }
+};
+
+// 页面加载即初始化
+SSHLog.init();
+</script>
