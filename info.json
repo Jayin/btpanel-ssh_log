@@ -5,7 +5,7 @@
     "versions": "1.0.0",
     "checks": "/www/server/panel/plugin/ssh_log",
     "author": "Rover",
-    "home": "https://www.bt.cn",
+    "home": "https://github.com/Jayin/btpanel-ssh_log",
     "beta": false,
     "force_message": ""
 }

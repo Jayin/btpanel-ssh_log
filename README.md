@@ -52,7 +52,7 @@ ssh_log/
 
 ```bash
 # 1. 克隆代码到宝塔插件目录
-git clone https://github.com/your-username/ssh_log.git /www/server/panel/plugin/ssh_log
+git clone https://github.com/Jayin/btpanel-ssh_log.git /www/server/panel/plugin/ssh_log
 
 # 2. 执行安装初始化脚本
 bash /www/server/panel/plugin/ssh_log/install.sh install
